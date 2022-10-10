@@ -1,0 +1,30 @@
+sitemap cyenviron label="CyEnviron" {
+	// NOTE: commands and states are taken from TelemetryHelper.h
+	Frame label="System Status and Control" {
+		Text item=CyEnvironSystemID
+		Text item=CyEnvironVersion
+		Text item=CyEnvironState label="System State: Booting" visibility=[CyEnvironState==0]
+		Text item=CyEnvironState label="System State: Normal" visibility=[CyEnvironState==1]
+		Text item=CyEnvironState label="System State: Updating" visibility=[CyEnvironState==2]
+		Text item=CyEnvironState label="System State: Disabled" visibility=[CyEnvironState==3]
+		Text item=CyEnvironState label="System State: Offline" visibility=[CyEnvironState==NULL,CyEnvironState==UNDEF]
+		Selection item=CyEnvironSystemCommand label="Control" mappings=[0="Disable",1="Enable",2="Reboot",3="Request Status"]
+	}
+
+	Frame label="Environment" {
+		Text item=CyEnvironAltitudeF
+		Text item=CyEnvironGasKohms
+		Text item=CyEnvironHudmidty
+		Text item=CyEnvironPressureHpa
+		Text item=CyEnvironTempF
+		Text item=CyEnvironAlarm
+		Text item=CyEnvironBrightness
+		// NOTE: Light levels taken from LDR.h
+		Text item=CyEnvironLightLevel label="Light Level: Dark" visibility=[CyEnvironLightLevel==0]
+		Text item=CyEnvironLightLevel label="Light Level: Dim" visibility=[CyEnvironLightLevel==1]
+		Text item=CyEnvironLightLevel label="Light Level: Light" visibility=[CyEnvironLightLevel==2]
+		Text item=CyEnvironLightLevel label="Light Level: Bright" visibility=[CyEnvironLightLevel==3]
+		Text item=CyEnvironLightLevel label="Light Level: Very Dark" visibility=[CyEnvironLightLevel==4]
+		Text item=CyEnvironLightLevel label="Light Level: Unknown" visibility=[CyEnvironLightLevel==NULL,CyEnvironLightLevel==UNDEF]
+	}
+}

@@ -1,0 +1,31 @@
+// NOTE: Commands taken from TelemetryHelper.h
+var String fileName = "cyenviron.rules"
+var String controlChannel = "cyenviron/control"
+var String jsonString = ""
+var String cmd = ""
+val actionsBroker = getActions("mqtt", "mqtt:broker:mosquitto")
+
+rule "Send System Command"
+when
+	Item CyEnvironSystemCommand changed
+then
+	var String sysId = CyEnvironSystemID.state.toString()
+	cmd = CyEnvironSystemCommand.state.toString()
+	switch (cmd) {
+		case "0":
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":0}"
+		case "1":
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":1}"
+		case "2":
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":2}"
+		case "3":
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":3}" 
+	}
+
+	if (!jsonString.isNullOrEmpty) {
+		logInfo(fileName, "Publishing MQTT payload: " + jsonString)
+		actionsBroker.publishMQTT(controlChannel, jsonString)
+		CyEnvironSystemCommand.postUpdate(NULL)
+		jsonString = ""
+	}
+end

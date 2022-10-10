@@ -1,0 +1,18 @@
+# PlatformIO transient files
+.pio/
+
+# We don't need these for now
+test/
+lib/
+
+# Archives
+*.zip
+
+# macOS crap
+.DS_Store
+
+# VS Code stuff
+.vscode/
+
+# Backup files
+*.bak

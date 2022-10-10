@@ -1,0 +1,14 @@
+Thing mqtt:topic:mosquitto:cyenviron "MQTT Thing CyEnviron" (mqtt:broker:mosquitto) @ "CyEnviron" {
+	Channels:
+		Type string : Version [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.firmwareVersion"]
+		Type number : SysState [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.systemState"]
+		Type string : SysID [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.clientId"]
+		Type number : AltitudeF [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.altitudeFeet"]
+		Type number : GasKohms [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.gasKohms"]
+		Type number : Humidity [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.humidity"]
+		Type number : PressureHpa [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.pressureHpa"]
+		Type number : TempF [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.tempF"]
+		Type number : Brightness [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.brightness"]
+		Type number : LightLevel [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.lightLevel"]
+		Type string : AlarmCondition [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.alarm"]
+}

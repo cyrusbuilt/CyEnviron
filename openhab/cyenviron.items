@@ -1,0 +1,13 @@
+String CyEnvironSystemID "System ID: [%s]" <keyring> { channel="mqtt:topic:mosquitto:cyenviron:SysID" }
+String CyEnvironVersion "Firmware version: [%s]" { channel="mqtt:topic:mosquitto:cyenviron:Version" }
+Number CyEnvironState <status> { channel="mqtt:topic:mosquitto:cyenviron:SysState" }
+String CyEnvironSystemCommand "Actions" <switch>
+
+Number CyEnvironAltitudeF "Altitude Ft: [%s]" <incline> { channel="mqtt:topic:mosquitto:cyenviron:AltitudeF" }
+Number CyEnvironGasKohms "Gas KOhms: [%s]" <gas> { channel="mqtt:topic:mosquitto:cyenviron:GasKohms" }
+Number CyEnvironHudmidty "Humidity %: [%s]" <humidity> { channel="mqtt:topic:mosquitto:cyenviron:Humidity" }
+Number CyEnvironPressureHpa "Barometric Pressure HPa: [%s]" <pressure> { channel="mqtt:topic:mosquitto:cyenviron:PressureHpa" }
+Number CyEnvironTempF "Tempurature F: [%s]" <temperature> { channel="mqtt:topic:mosquitto:cyenviron:TempF" }
+Number CyEnvironBrightness "Brightness %: [%s]" <light> { channel="mqtt:topic:mosquitto:cyenviron:Brightness" }
+Number CyEnvironLightLevel <colorlight> { channel="mqtt:topic:mosquitto:cyenviron:LightLevel" }
+String CyEnvironAlarm "Alarm: [%s]" <alarm> { channel="mqtt:topic:mosquitto:cyenviron:AlarmCondition" }
