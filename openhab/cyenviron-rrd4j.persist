@@ -1,0 +1,15 @@
+Strategies {
+    everyMinute : "0 * * * * ?"
+    everyHour : "0 0 * * * ?"
+    everyDay  : "0 0 0 * * ?"
+
+    default = everyChange
+}
+
+Items {
+    CyEnvironGasKohms : strategy=everyChange, restoreOnStartup
+    CyEnvironHudmidty : strategy=everyChange, restoreOnStartup
+    CyEnvironPressureHpa : strategy=everyChange, restoreOnStartup
+    CyEnvironTempF : strategy=everyChange, restoreOnStartup
+    CyEnvironBrightness : strategy=everyChange, restoreOnStartup
+}

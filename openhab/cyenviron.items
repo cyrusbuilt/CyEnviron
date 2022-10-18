@@ -11,3 +11,9 @@ Number CyEnvironTempF "Tempurature F: [%s]" <temperature> { channel="mqtt:topic:
 Number CyEnvironBrightness "Brightness %: [%s]" <light> { channel="mqtt:topic:mosquitto:cyenviron:Brightness" }
 Number CyEnvironLightLevel <colorlight> { channel="mqtt:topic:mosquitto:cyenviron:LightLevel" }
 String CyEnvironAlarm "Alarm: [%s]" <alarm> { channel="mqtt:topic:mosquitto:cyenviron:AlarmCondition" }
+
+Number CyEnvironGasChartPeriod
+Number CyEnvironHumidityChartPeriod
+Number CyEnvironPressureChartPeriod
+Number CyEnvironTempChartPeriod
+Number CyEnvironBrightnessChartPeriod

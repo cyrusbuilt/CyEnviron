@@ -27,4 +27,39 @@ sitemap cyenviron label="CyEnviron" {
 		Text item=CyEnvironLightLevel label="Light Level: Very Dark" visibility=[CyEnvironLightLevel==4]
 		Text item=CyEnvironLightLevel label="Light Level: Unknown" visibility=[CyEnvironLightLevel==NULL,CyEnvironLightLevel==UNDEF]
 	}
+
+	Frame label="Gas History" {
+		Switch item=CyEnvironGasChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironGasKohms period=h refresh=3000 visibility=[CyEnvironGasChartPeriod==0,CyEnvironGasChartPeriod==NULL]
+		Chart item=CyEnvironGasKohms period=D refresh=3000 visibility=[CyEnvironGasChartPeriod==1]
+		Chart item=CyEnvironGasKohms period=W refresh=3000 visibility=[CyEnvironGasChartPeriod==2]
+	}
+
+	Frame label="Humidity History" {
+		Switch item=CyEnvironHumidityChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironHudmidty period=h refresh=3000 visibility=[CyEnvironHumidityChartPeriod==0,CyEnvironHumidityChartPeriod==NULL]
+		Chart item=CyEnvironHudmidty period=D refresh=3000 visibility=[CyEnvironHumidityChartPeriod==1]
+		Chart item=CyEnvironHudmidty period=W refresh=3000 visibility=[CyEnvironHumidityChartPeriod==2]
+	}
+
+	Frame label="Pressure History" {
+		Switch item=CyEnvironPressureChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironPressureHpa period=h refresh=3000 visibility=[CyEnvironPressureChartPeriod==0,CyEnvironPressureChartPeriod==NULL]
+		Chart item=CyEnvironPressureHpa period=D refresh=3000 visibility=[CyEnvironPressureChartPeriod==1]
+		Chart item=CyEnvironPressureHpa period=W refresh=3000 visibility=[CyEnvironPressureChartPeriod==2]
+	}
+
+	Frame label="Temp History" {
+		Switch item=CyEnvironTempChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironTempF period=h refresh=3000 visibility=[CyEnvironTempChartPeriod==0,CyEnvironTempChartPeriod==NULL]
+		Chart item=CyEnvironTempF period=D refresh=3000 visibility=[CyEnvironTempChartPeriod==1]
+		Chart item=CyEnvironTempF period=W refresh=3000 visibility=[CyEnvironTempChartPeriod==2]
+	}
+
+	Frame label="Brightness History" {
+		Switch item=CyEnvironBrightnessChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironBrightness period=h refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==0,CyEnvironBrightnessChartPeriod==NULL]
+		Chart item=CyEnvironBrightness period=D refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==1]
+		Chart item=CyEnvironBrightness period=W refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==2]
+	}
 }
