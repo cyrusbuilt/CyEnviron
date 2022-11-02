@@ -7,7 +7,7 @@
  * sea-level and eventually will provide measurements for IAQ (Indoor Air
  * Quality) and VOC (Volatile Organic Compounds) which can be used to detect
  * the presence of dangerous gasses such as Carbon Monoxide, etc.
- * @version 1.0
+ * @version 1.1
  * @date 2022-09-19
  * 
  * @copyright Copyright (c) 2022 Cyrus Brunner
@@ -23,6 +23,7 @@
 #include <time.h>
 #include <TZ.h>
 #include <Wire.h>
+#include "config.h"
 #include "ArduinoJson.h"
 #include "ESPCrashMonitor.h"
 #include "Console.h"
@@ -32,14 +33,11 @@
 #include "ResetManager.h"
 #include "TaskScheduler.h"
 #include "TelemetryHelper.h"
-#include "Adafruit_Sensor.h"
-#include "Adafruit_BME680.h"
 #include "bsec.h"
 #include "Environment.h"
 #include "LDR.h"
-#include "config.h"
 
-#define FIRMWARE_VERSION "1.0"
+#define FIRMWARE_VERSION "1.1"
 
 // Pin definitions
 #define PIN_WIFI_LED 16
@@ -69,7 +67,7 @@ Scheduler taskMan;
 LED wifiLED(PIN_WIFI_LED, NULL);
 LED alarmLED(PIN_ALARM_LED, NULL);
 Buzzer alarmBuzzer(PIN_ALARM_BUZZER, NULL, "alarm");
-Adafruit_BME680 bme;
+Bsec iaqSensor;
 LDR ldr(PIN_LDR);
 config_t config;
 env_t envData;
@@ -79,12 +77,14 @@ volatile SystemState sysState = SystemState::BOOTING;
 /**
  * @brief Get the current date/time as string (adjusted for local time and DST).
  * 
- * @return char* The current time string.
+ * @return String The current time string.
  */
-char* getTimeInfo() {
+String getTimeInfo() {
     time_t now = time(nullptr);
     struct tm *timeinfo = localtime(&now);
-    return asctime(timeinfo);
+    String result = String(asctime(timeinfo));
+    result.replace("\n", "");
+    return result;
 }
 
 /**
@@ -121,7 +121,7 @@ void publishSystemState() {
         wifiLED.on();
 
         // TODO Make reported measurements configurable (imperial vs metric, or both).
-        DynamicJsonDocument doc(250);
+        DynamicJsonDocument doc(400);
         doc["clientId"] = config.hostname.c_str();
         doc["firmwareVersion"] = FIRMWARE_VERSION;
         doc["systemState"] = (uint8_t)sysState;
@@ -133,7 +133,12 @@ void publishSystemState() {
         doc["brightness"] = envData.brightness;
         doc["lightLevel"] = (uint8_t)envData.lightLevel;
         doc["alarm"] = envData.alarmCondition;
-        // TODO report IAQ and VOC
+        doc["iaq"] = envData.iaq;
+        doc["co2Equivalent"] = envData.co2Equivalent;
+        doc["breathVoc"] = envData.breathVoc;
+        doc["dewPoint"] = envData.dewPoint;
+        doc["aqi"] = envData.aqi;
+        doc["lastUpdate"] = envData.lastUpdate;
 
         String jsonStr;
         size_t len = serializeJson(doc, jsonStr);
@@ -179,27 +184,63 @@ void clearAlarm() {
 }
 
 /**
+ * @brief Checks that status of the BME680/688 sensor and reports any errors
+ * or warnings detected.
+ */
+void checkIaqSensorStatus() {
+    String output = "";
+    if (iaqSensor.stabStatus != BSEC_OK) {
+        if (iaqSensor.stabStatus < BSEC_OK) {
+            output = "ERROR: BSEC error code: ";
+        }
+        else {
+            output = "WARN: BSEC warn code: ";
+        }
+
+        output += String(iaqSensor.status);
+        Serial.println(output);
+    }
+
+    if (iaqSensor.bme680Status != BME680_OK) {
+        if (iaqSensor.bme680Status < BME680_OK) {
+            output = "ERROR: BME680/688 error code: ";
+        }
+        else {
+            output = "WARN: BME680/688 warn code: ";
+        }
+
+        output += String(iaqSensor.bme680Status);
+        Serial.println(output);
+    }
+}
+
+/**
  * @brief Read all the sensor data and publishes the updated state data.
  */
 void onReadSensors() {
     Serial.println(F("INFO: Reading sensor data ..."));
-    if (!bme.performReading()) {
-        Serial.println(F("ERROR: Failed to read BME688!"));
+    if (!iaqSensor.run()) {
+       checkIaqSensorStatus();
+       return;
     }
 
     ldr.performReading();
 
-    envData.altitudeM = bme.readAltitude(SENSORS_PRESSURE_SEALEVELHPA);
+    envData.altitudeM = EnvUtils::getAltitude(iaqSensor.pressure, AVG_PRESSURE_SEALEVEL_HPA);
     envData.altitudeF = envData.altitudeM * 3.281;
-    envData.gasKohms = bme.gas_resistance / 1000.0;
-    envData.humidity = bme.humidity;
-    envData.pressureHpa = bme.pressure / 100.0;
-    envData.tempC = bme.temperature;
+    envData.gasKohms = iaqSensor.gasResistance / 10000;
+    envData.humidity = iaqSensor.humidity;
+    envData.pressureHpa = iaqSensor.pressure / 100.0;
+    envData.tempC = iaqSensor.temperature;
     envData.tempF = envData.tempC * 9 / 5 + 32;
+    envData.iaq = iaqSensor.staticIaq;
+    envData.co2Equivalent = iaqSensor.co2Equivalent;
+    envData.breathVoc = iaqSensor.breathVocEquivalent;
+    envData.dewPoint = EnvUtils::getDewPoint(envData.tempC, envData.humidity);
+    envData.aqi = (uint8_t)EnvUtils::getAQI(envData.iaq);
     envData.brightness = ldr.readSensorBrightness();
     envData.lightLevel = ldr.getBrightnessLevel();
-
-    // TODO Can we also call into the BSEC library so we can get version, IAQ, and VOC data?
+    envData.lastUpdate = getTimeInfo();
 
     // TODO Need to determine some threshold values for alarm conditions and then trigger.
 
@@ -741,6 +782,7 @@ void initMQTT() {
     Serial.print(F("INIT: Initializing MQTT client... "));
     mqttClient.setServer(config.mqttBroker.c_str(), config.mqttPort);
     mqttClient.setCallback(onMqttMessage);
+    mqttClient.setBufferSize(500);
     Serial.println(F("DONE"));
     if (reconnectMqttClient()) {
         delay(500);
@@ -909,19 +951,43 @@ void initSerial() {
  * @brief Initializes the BME680/BME688 sensor.
  */
 void initGasSensor() {
-    Serial.print(F("INIT: Initializing BME688 sensor ..."));
-    if (!bme.begin()) {
+    Serial.print(F("INIT: Initializing BME680/688 sensor ..."));
+    Wire.begin();
+    iaqSensor.begin(BME680_I2C_ADDR_SECONDARY, Wire);
+    if (iaqSensor.status != BSEC_OK || iaqSensor.bme680Status != BME680_OK) {
         Serial.println(F("FAIL"));
-        Serial.println(F("ERROR: Sensor not detected."));
+        checkIaqSensorStatus();
         return;
     }
 
-    bme.setTemperatureOversampling(BME68X_OS_8X);
-    bme.setHumidityOversampling(BME68X_OS_2X);
-    bme.setPressureOversampling(BME68X_OS_4X);
-    bme.setIIRFilterSize(BME68X_FILTER_SIZE_3);
-    bme.setGasHeater(320, 150);
+    bsec_virtual_sensor_t sensorList[10] = {
+        BSEC_OUTPUT_RAW_TEMPERATURE,
+        BSEC_OUTPUT_RAW_PRESSURE,
+        BSEC_OUTPUT_RAW_HUMIDITY,
+        BSEC_OUTPUT_RAW_GAS,
+        BSEC_OUTPUT_IAQ,
+        BSEC_OUTPUT_STATIC_IAQ,
+        BSEC_OUTPUT_CO2_EQUIVALENT,
+        BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
+        BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
+        BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY
+    };
+
+    iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
+    if (iaqSensor.status != BSEC_OK || iaqSensor.bme680Status != BME680_OK) {
+        Serial.println(F("FAIL"));
+        checkIaqSensorStatus();
+        return;
+    }
+
     Serial.println(F("DONE"));
+    
+    String libVersion = "INIT: BSEC library v";
+    libVersion += String(iaqSensor.version.major) + ".";
+    libVersion += String(iaqSensor.version.minor) + ".";
+    libVersion += String(iaqSensor.version.major_bugfix) + ".";
+    libVersion += String(iaqSensor.version.minor_bugfix);
+    Serial.println(libVersion);
 }
 
 /**

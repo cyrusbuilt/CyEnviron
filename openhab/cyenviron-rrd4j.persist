@@ -12,4 +12,7 @@ Items {
     CyEnvironPressureHpa : strategy=everyChange, restoreOnStartup
     CyEnvironTempF : strategy=everyChange, restoreOnStartup
     CyEnvironBrightness : strategy=everyChange, restoreOnStartup
+    CyEnvironIaq : strategy=everyChange, restoreOnStartup
+    CyEnvironCO2Equivalent : strategy=everyChange, restoreOnStartup
+    CyEnvironBreathVoc : strategy=everyChange, restoreOnStartup
 }

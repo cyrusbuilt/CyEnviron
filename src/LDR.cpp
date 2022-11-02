@@ -60,8 +60,10 @@ int LDR::readSensorBrightness() {
 
 BrightnessLevel LDR::getBrightnessLevel() {
 	int brightness = _rawReading;
+	#ifdef DEBUG
 	Serial.print(F("DEBUG: Raw light reading: "));
 	Serial.println(brightness);
+	#endif
 	if (brightness < MAX_BRIGHT_THRESHOLD) {
 		return BrightnessLevel::BRIGHT;
 	}

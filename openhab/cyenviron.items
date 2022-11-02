@@ -3,17 +3,26 @@ String CyEnvironVersion "Firmware version: [%s]" { channel="mqtt:topic:mosquitto
 Number CyEnvironState <status> { channel="mqtt:topic:mosquitto:cyenviron:SysState" }
 String CyEnvironSystemCommand "Actions" <switch>
 
-Number CyEnvironAltitudeF "Altitude Ft: [%s]" <incline> { channel="mqtt:topic:mosquitto:cyenviron:AltitudeF" }
+Number CyEnvironAltitudeF "Approx Altitude Ft: [%s]" <incline> { channel="mqtt:topic:mosquitto:cyenviron:AltitudeF" }
 Number CyEnvironGasKohms "Gas KOhms: [%s]" <gas> { channel="mqtt:topic:mosquitto:cyenviron:GasKohms" }
 Number CyEnvironHudmidty "Humidity %: [%s]" <humidity> { channel="mqtt:topic:mosquitto:cyenviron:Humidity" }
 Number CyEnvironPressureHpa "Barometric Pressure HPa: [%s]" <pressure> { channel="mqtt:topic:mosquitto:cyenviron:PressureHpa" }
-Number CyEnvironTempF "Tempurature F: [%s]" <temperature> { channel="mqtt:topic:mosquitto:cyenviron:TempF" }
+Number CyEnvironDewPoint "Dew Point *F: [%s]" <water> { channel="mqtt:topic:mosquitto:cyenviron:DewPoint" }
+Number CyEnvironTempF "Tempurature *F: [%s]" <temperature> { channel="mqtt:topic:mosquitto:cyenviron:TempF" }
 Number CyEnvironBrightness "Brightness %: [%s]" <light> { channel="mqtt:topic:mosquitto:cyenviron:Brightness" }
 Number CyEnvironLightLevel <colorlight> { channel="mqtt:topic:mosquitto:cyenviron:LightLevel" }
 String CyEnvironAlarm "Alarm: [%s]" <alarm> { channel="mqtt:topic:mosquitto:cyenviron:AlarmCondition" }
+Number CyEnvironIaq "Indoor Air Quality: [%s]" <qualityofservice> { channel="mqtt:topic:mosquitto:cyenviron:IAQ" }
+Number CyEnvironAqi <greenhouse> { channel="mqtt:topic:mosquitto:cyenviron:AQI" }
+Number CyEnvironCO2Equivalent "CO2 Equivalent: [%s]" <carbondioxide> { channel="mqtt:topic:mosquitto:cyenviron:CO2Equivalent" }
+Number CyEnvironBreathVoc "Breath VOC: [%s]" <flow> { channel="mqtt:topic:mosquitto:cyenviron:BreathVoc" }
+String CyEnvironLastUpdate "Last update: " <time> { channel="mqtt:topic:mosquitto:cyenviron:LastUpdate" }
 
 Number CyEnvironGasChartPeriod
 Number CyEnvironHumidityChartPeriod
 Number CyEnvironPressureChartPeriod
 Number CyEnvironTempChartPeriod
 Number CyEnvironBrightnessChartPeriod
+Number CyEnvironIaqChartPeriod
+Number CyEnvironCo2ChartPeriod
+Number CyEnvironBreathVocChartPeriod
