@@ -16,6 +16,11 @@ Once every 5 seconds (by default), CyEnviron will take the following measurement
 - Altitude above sealevel
 - Gas Resistance
 - Ambient light level
+- Indoor Air Quality (IAQ)
+- Air Quality Index (AQI)
+- CO2 Equivalent
+- Breath Volatile Organic Compounds (Breath VOC)
+- Dew Point
 
 Ambient light level is sampled using an [LDR/CDS Photocell](https://www.electronics-notes.com/articles/electronic_components/resistors/light-dependent-resistor-ldr.php). All other measurements are sampled using an [Adafruit BME688/BME680](https://www.adafruit.com/product/5046). At present, the more advanced features such as integrated AI (BME688), IAQ (Indoor Air Quality), and VOC (Volatile Organic Compound) sampling are not yet supported (but will be in a future firmware release). Specifically, this project was designed to use the BME688 module, but the BME680 *can* be used instead (especially since the more advanced features of the 688 are not yet implemented).  In a future release, I also intend to support alarm thresholds for certain values. Once the threshold value(s) are exceeded an audible and visible alarm will trigger and also be published as part of the status payload.
 

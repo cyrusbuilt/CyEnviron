@@ -12,13 +12,28 @@ sitemap cyenviron label="CyEnviron" {
 	}
 
 	Frame label="Environment" {
+		Text item=CyEnvironAlarm
 		Text item=CyEnvironAltitudeF
-		Text item=CyEnvironGasKohms
+		Text item=CyEnvironTempF
 		Text item=CyEnvironHudmidty
 		Text item=CyEnvironPressureHpa
-		Text item=CyEnvironTempF
-		Text item=CyEnvironAlarm
+		Text item=CyEnvironDewPoint
+		// NOTE: AQI levels taken from Environment.h
+		Text item=CyEnvironAqi label="Air Quality Index: Excellent" visibility=[CyEnvironAqi==0]
+		Text item=CyEnvironAqi label="Air Quality Index: Good" visibility=[CyEnvironAqi==1]
+		Text item=CyEnvironAqi label="Air Quality Index: Ligh Pollution" visibility=[CyEnvironAqi==2]
+		Text item=CyEnvironAqi label="Air Quality Index: Moderate Pollution" visibility=[CyEnvironAqi==3]
+		Text item=CyEnvironAqi label="Air Quality Index: Heavy Pollution" visibility=[CyEnvironAqi==4]
+		Text item=CyEnvironAqi label="Air Quality Index: Severe Pollution" visibility=[CyEnvironAqi==5]
+		Text item=CyEnvironAqi label="Air Quality Index: Extreme Pollution" visibility=[CyEnvironAqi==6]
+		Text item=CyEnvironAqi label="Air Quality Index: Unknown" visibility=[CyEnvironAqi==NULL,CyEnvironAqi==UNDEF]
+		
+		Text item=CyEnvironIaq
+		Text item=CyEnvironCO2Equivalent
+		Text item=CyEnvironBreathVoc
+		Text item=CyEnvironGasKohms
 		Text item=CyEnvironBrightness
+
 		// NOTE: Light levels taken from LDR.h
 		Text item=CyEnvironLightLevel label="Light Level: Dark" visibility=[CyEnvironLightLevel==0]
 		Text item=CyEnvironLightLevel label="Light Level: Dim" visibility=[CyEnvironLightLevel==1]
@@ -26,6 +41,8 @@ sitemap cyenviron label="CyEnviron" {
 		Text item=CyEnvironLightLevel label="Light Level: Bright" visibility=[CyEnvironLightLevel==3]
 		Text item=CyEnvironLightLevel label="Light Level: Very Dark" visibility=[CyEnvironLightLevel==4]
 		Text item=CyEnvironLightLevel label="Light Level: Unknown" visibility=[CyEnvironLightLevel==NULL,CyEnvironLightLevel==UNDEF]
+
+		Text item=CyEnvironLastUpdate
 	}
 
 	Frame label="Gas History" {
@@ -61,5 +78,26 @@ sitemap cyenviron label="CyEnviron" {
 		Chart item=CyEnvironBrightness period=h refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==0,CyEnvironBrightnessChartPeriod==NULL]
 		Chart item=CyEnvironBrightness period=D refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==1]
 		Chart item=CyEnvironBrightness period=W refresh=3000 visibility=[CyEnvironBrightnessChartPeriod==2]
+	}
+
+	Frame label="IAQ History" {
+		Switch item=CyEnvironIaqChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironIaq period=h refresh=3000 visibility=[CyEnvironIaqChartPeriod==0,CyEnvironIaqChartPeriod==NULL]
+		Chart item=CyEnvironIaq period=D refresh=3000 visibility=[CyEnvironIaqChartPeriod==1]
+		Chart item=CyEnvironIaq period=W refresh=3000 visibility=[CyEnvironIaqChartPeriod==2]
+	}
+
+	Frame label="CO2 History" {
+		Switch item=CyEnvironCo2ChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironCO2Equivalent period=h refresh=3000 visibility=[CyEnvironCo2ChartPeriod==0,CyEnvironCo2ChartPeriod==NULL]
+		Chart item=CyEnvironCO2Equivalent period=D refresh=3000 visibility=[CyEnvironCo2ChartPeriod==1]
+		Chart item=CyEnvironCO2Equivalent period=W refresh=3000 visibility=[CyEnvironCo2ChartPeriod==2]
+	}
+
+	Frame label="Breath VOC History" {
+		Switch item=CyEnvironBreathVocChartPeriod label="Chart Period" mappings=[0="Hour",1="Day",2="Week"]
+		Chart item=CyEnvironBreathVoc period=h refresh=3000 visibility=[CyEnvironBreathVocChartPeriod==0,CyEnvironBreathVocChartPeriod==NULL]
+		Chart item=CyEnvironBreathVoc period=D refresh=3000 visibility=[CyEnvironBreathVocChartPeriod==1]
+		Chart item=CyEnvironBreathVoc period=W refresh=3000 visibility=[CyEnvironBreathVocChartPeriod==2]
 	}
 }

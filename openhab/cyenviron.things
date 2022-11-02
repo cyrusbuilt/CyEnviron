@@ -11,4 +11,10 @@ Thing mqtt:topic:mosquitto:cyenviron "MQTT Thing CyEnviron" (mqtt:broker:mosquit
 		Type number : Brightness [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.brightness"]
 		Type number : LightLevel [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.lightLevel"]
 		Type string : AlarmCondition [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.alarm"]
+		Type number : IAQ [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.iaq"]
+		Type number : CO2Equivalent [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.co2Equivalent"]
+		Type number : BreathVoc [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.breathVoc"]
+		Type number : DewPoint [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.dewPoint"]
+		Type number : AQI [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.aqi"]
+		Type string : LastUpdate [stateTopic="cyenviron/status", transformationPattern="JSONPATH:$.lastUpdate"]
 }
