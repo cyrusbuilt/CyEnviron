@@ -8,6 +8,16 @@
 // for the current location and just fall back to this if invalid or omitted.
 #define AVG_PRESSURE_SEALEVEL_HPA (1013.25F)
 
+enum class AQI : uint8_t {
+	EXCELLENT = 0,
+	GOOD = 1,
+	LIGHTLY_POLLUTED = 2,
+	MODERATELY_POLLUTED = 3,
+	HEAVILY_POLLUTED = 4,
+	SEVERELY_POLLUTED = 5,
+	EXTREME_POLLUTION = 6
+};
+
 typedef struct {
 	float tempF;
 	float tempC;
@@ -23,19 +33,9 @@ typedef struct {
 	float co2Equivalent;
 	float breathVoc;
 	double dewPoint;
-	uint8_t aqi;
+	AQI aqi;
 	String lastUpdate;
 } env_t;
-
-enum class AQI : uint8_t {
-	EXCELLENT = 0,
-	GOOD = 1,
-	LIGHTLY_POLLUTED = 2,
-	MODERATELY_POLLUTED = 3,
-	HEAVILY_POLLUTED = 4,
-	SEVERELY_POLLUTED = 5,
-	EXTREME_POLLUTION = 6
-};
 
 class EnvUtils {
 public:
