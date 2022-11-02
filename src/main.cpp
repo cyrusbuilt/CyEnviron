@@ -7,7 +7,7 @@
  * sea-level and eventually will provide measurements for IAQ (Indoor Air
  * Quality) and VOC (Volatile Organic Compounds) which can be used to detect
  * the presence of dangerous gasses such as Carbon Monoxide, etc.
- * @version 1.1
+ * @version 1.2
  * @date 2022-09-19
  * 
  * @copyright Copyright (c) 2022 Cyrus Brunner
@@ -37,7 +37,7 @@
 #include "Environment.h"
 #include "LDR.h"
 
-#define FIRMWARE_VERSION "1.1"
+#define FIRMWARE_VERSION "1.2"
 
 // Pin definitions
 #define PIN_WIFI_LED 16
@@ -137,7 +137,7 @@ void publishSystemState() {
         doc["co2Equivalent"] = envData.co2Equivalent;
         doc["breathVoc"] = envData.breathVoc;
         doc["dewPoint"] = envData.dewPoint;
-        doc["aqi"] = envData.aqi;
+        doc["aqi"] = (uint8_t)envData.aqi;
         doc["lastUpdate"] = envData.lastUpdate;
 
         String jsonStr;
@@ -181,6 +181,53 @@ void clearAlarm() {
     sysState = SystemState::NORMAL;
     envData.alarmCondition = "";
     publishSystemState();
+}
+
+/**
+ * @brief Silences the audible alarm, but does not clear the alarm state.
+ */
+void silenceAlarm() {
+    if (sysState == SystemState::ALARM) {
+        Serial.println(F("WARN: Alarm silenced."));
+        alarmBuzzer.off();
+    }
+}
+
+/**
+ * @brief Checks for alarm conditions. This will clear an active alarm if the
+ * alarm conditions drop below threshold or raise an alarm if conditions go
+ * above threshold. Trigger an alarm causes a number of things to happen:
+ * 1) Alarm buzzer turns on.
+ * 2) Alarm LED turns on.
+ * 3) System state changes to ALARM.
+ * 4) alarmCondition in env data set to reason for alarm.
+ * 5) Updated state is then published to MQTT status topic.
+ */
+void checkAlarm() {
+    switch (envData.aqi) {
+        case AQI::EXCELLENT:
+        case AQI::GOOD:
+        case AQI::LIGHTLY_POLLUTED:
+            if (sysState == SystemState::ALARM) {
+                clearAlarm();
+            }
+            break;
+        case AQI::MODERATELY_POLLUTED:
+        case AQI::HEAVILY_POLLUTED:
+        case AQI::SEVERELY_POLLUTED:
+        case AQI::EXTREME_POLLUTION:
+            if (sysState != SystemState::ALARM) {
+                raiseAlarm("High pollution level!");
+            }
+            break;
+        default:
+            break;
+    }
+
+    // TODO CO2 levels factor in to the IAQ/AQI level, but do we want a separate check for that?
+    // NOTE acceptable CO2 range is 400 - 650.
+
+    // TODO should we have an alarm for temperature/humidity?
 }
 
 /**
@@ -237,13 +284,12 @@ void onReadSensors() {
     envData.co2Equivalent = iaqSensor.co2Equivalent;
     envData.breathVoc = iaqSensor.breathVocEquivalent;
     envData.dewPoint = EnvUtils::getDewPoint(envData.tempC, envData.humidity);
-    envData.aqi = (uint8_t)EnvUtils::getAQI(envData.iaq);
+    envData.aqi = EnvUtils::getAQI(envData.iaq);
     envData.brightness = ldr.readSensorBrightness();
     envData.lightLevel = ldr.getBrightnessLevel();
     envData.lastUpdate = getTimeInfo();
 
-    // TODO Need to determine some threshold values for alarm conditions and then trigger.
-
+    checkAlarm();
     publishSystemState();
 }
 
@@ -646,6 +692,9 @@ void handleControlRequest(ControlCommand cmd) {
             reboot();
             break;
         case ControlCommand::REQUEST_STATUS:
+            break;
+        case ControlCommand::SILENCE_ALARM:
+            silenceAlarm();
             break;
         default:
             Serial.print(F("WARN: Unknown command: "));

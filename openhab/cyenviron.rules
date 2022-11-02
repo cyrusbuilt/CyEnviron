@@ -19,7 +19,9 @@ then
 		case "2":
 			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":2}"
 		case "3":
-			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":3}" 
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":3}"
+		case "4":
+			jsonString = "{\"client_id\":\"" + sysId + "\",\"command\":4}"
 	}
 
 	if (!jsonString.isNullOrEmpty) {
@@ -27,5 +29,16 @@ then
 		actionsBroker.publishMQTT(controlChannel, jsonString)
 		CyEnvironSystemCommand.postUpdate(NULL)
 		jsonString = ""
+	}
+end
+
+rule "Alarm Triggered"
+when
+	Item CyEnvironState changed 
+then
+	if (CyEnvironState.state === 4) {
+		val String condition = CyEnvironAlarm.state
+		logInfo(fileName, condition)
+		sendBroadcastNotification(condition)
 	}
 end

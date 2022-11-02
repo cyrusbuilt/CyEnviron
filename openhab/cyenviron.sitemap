@@ -8,7 +8,7 @@ sitemap cyenviron label="CyEnviron" {
 		Text item=CyEnvironState label="System State: Updating" visibility=[CyEnvironState==2]
 		Text item=CyEnvironState label="System State: Disabled" visibility=[CyEnvironState==3]
 		Text item=CyEnvironState label="System State: Offline" visibility=[CyEnvironState==NULL,CyEnvironState==UNDEF]
-		Selection item=CyEnvironSystemCommand label="Control" mappings=[0="Disable",1="Enable",2="Reboot",3="Request Status"]
+		Selection item=CyEnvironSystemCommand label="Control" mappings=[0="Disable",1="Enable",2="Reboot",3="Request Status",4="Silence Alarm"]
 	}
 
 	Frame label="Environment" {
