@@ -32,7 +32,8 @@ typedef struct {
 	float iaq;
 	float co2Equivalent;
 	float breathVoc;
-	double dewPoint;
+	double dewPointC;
+	double dewPointF;
 	AQI aqi;
 	String lastUpdate;
 } env_t;
@@ -42,5 +43,6 @@ public:
 	static float getAltitude(double pressure, float seaLevel);
 	static double getDewPoint(float tempC, float humidity);
 	static AQI getAQI(float iaq);
+	static double convertTempCtoF(double celcius);
 };
 #endif

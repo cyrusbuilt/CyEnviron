@@ -7,7 +7,7 @@
  * sea-level and eventually will provide measurements for IAQ (Indoor Air
  * Quality) and VOC (Volatile Organic Compounds) which can be used to detect
  * the presence of dangerous gasses such as Carbon Monoxide, etc.
- * @version 1.2
+ * @version 1.3
  * @date 2022-09-19
  * 
  * @copyright Copyright (c) 2022 Cyrus Brunner
@@ -37,7 +37,7 @@
 #include "Environment.h"
 #include "LDR.h"
 
-#define FIRMWARE_VERSION "1.2"
+#define FIRMWARE_VERSION "1.3"
 
 // Pin definitions
 #define PIN_WIFI_LED 16
@@ -136,7 +136,7 @@ void publishSystemState() {
         doc["iaq"] = envData.iaq;
         doc["co2Equivalent"] = envData.co2Equivalent;
         doc["breathVoc"] = envData.breathVoc;
-        doc["dewPoint"] = envData.dewPoint;
+        doc["dewPoint"] = envData.dewPointF;
         doc["aqi"] = (uint8_t)envData.aqi;
         doc["lastUpdate"] = envData.lastUpdate;
 
@@ -279,11 +279,12 @@ void onReadSensors() {
     envData.humidity = iaqSensor.humidity;
     envData.pressureHpa = iaqSensor.pressure / 100.0;
     envData.tempC = iaqSensor.temperature;
-    envData.tempF = envData.tempC * 9 / 5 + 32;
+    envData.tempF = EnvUtils::convertTempCtoF(envData.tempC);
     envData.iaq = iaqSensor.staticIaq;
     envData.co2Equivalent = iaqSensor.co2Equivalent;
     envData.breathVoc = iaqSensor.breathVocEquivalent;
-    envData.dewPoint = EnvUtils::getDewPoint(envData.tempC, envData.humidity);
+    envData.dewPointC = EnvUtils::getDewPoint(envData.tempC, envData.humidity);
+    envData.dewPointF = EnvUtils::convertTempCtoF(envData.dewPointC);
     envData.aqi = EnvUtils::getAQI(envData.iaq);
     envData.brightness = ldr.readSensorBrightness();
     envData.lightLevel = ldr.getBrightnessLevel();

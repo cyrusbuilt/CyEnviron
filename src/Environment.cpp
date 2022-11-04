@@ -12,6 +12,10 @@ double EnvUtils::getDewPoint(float tempC, float humidity) {
 	return (b * temp) / (a - temp);
 }
 
+double EnvUtils::convertTempCtoF(double celcius) {
+	return celcius * 9 / 5 + 32;
+}
+
 AQI EnvUtils::getAQI(float iaq) {
 	if (iaq <= 50) {
 		return AQI::EXCELLENT;
