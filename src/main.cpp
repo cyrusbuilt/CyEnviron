@@ -7,7 +7,7 @@
  * sea-level and eventually will provide measurements for IAQ (Indoor Air
  * Quality) and VOC (Volatile Organic Compounds) which can be used to detect
  * the presence of dangerous gasses such as Carbon Monoxide, etc.
- * @version 1.3
+ * @version 1.4
  * @date 2022-09-19
  * 
  * @copyright Copyright (c) 2022 Cyrus Brunner
@@ -37,7 +37,7 @@
 #include "Environment.h"
 #include "LDR.h"
 
-#define FIRMWARE_VERSION "1.3"
+#define FIRMWARE_VERSION "1.4"
 
 // Pin definitions
 #define PIN_WIFI_LED 16
@@ -145,6 +145,32 @@ void publishSystemState() {
         Serial.print(F("INFO: Publishing system state: "));
         Serial.println(jsonStr);
         if (!mqttClient.publish(config.mqttTopicStatus.c_str(), jsonStr.c_str(), len)) {
+            Serial.println(F("ERROR: Failed to publish message."));
+        }
+
+        doc.clear();
+        wifiLED.off();
+    }
+}
+
+/**
+ * @brief Publishes a device disovery packet to the configured discovery topic.
+ */
+void publishDiscoveryPacket() {
+    if (mqttClient.connected()) {
+        wifiLED.on();
+
+        DynamicJsonDocument doc(250);
+        doc["name"] = config.hostname;
+        doc["class"] = DEVICE_CLASS;
+        doc["statusTopic"] = config.mqttTopicStatus;
+        doc["controlTopic"] = config.mqttTopicControl;
+
+        String jsonStr;
+        size_t len = serializeJson(doc, jsonStr);
+        Serial.print(F("INFO: Publishing discovery packet: "));
+        Serial.println(jsonStr);
+        if (!mqttClient.publish(config.mqttTopicDiscovery.c_str(), jsonStr.c_str(), len)) {
             Serial.println(F("ERROR: Failed to publish message."));
         }
 
@@ -359,8 +385,9 @@ void saveConfiguration() {
     doc["timezone"] = config.clockTimezone;
     doc["mqttBroker"] = config.mqttBroker;
     doc["mqttPort"] = config.mqttPort;
-    doc["mqttControlChannel"] = config.mqttTopicControl;
-    doc["mqttStatusChannel"] = config.mqttTopicStatus;
+    doc["mqttControlTopic"] = config.mqttTopicControl;
+    doc["mqttStatusTopic"] = config.mqttTopicStatus;
+    doc["mqttDiscoveryTopic"] = config.mqttTopicDiscovery;
     doc["mqttUsername"] = config.mqttUsername;
     doc["mqttPassword"] = config.mqttPassword;
     #ifdef ENABLE_OTA
@@ -408,6 +435,7 @@ void setConfigurationDefaults() {
     config.mqttPort = MQTT_PORT;
     config.mqttTopicControl = MQTT_TOPIC_CONTROL;
     config.mqttTopicStatus = MQTT_TOPIC_STATUS;
+    config.mqttTopicDiscovery = MQTT_TOPIC_DISCOVERY;
     config.mqttUsername = "";
     config.password = DEFAULT_PASSWORD;
     config.sm = defaultSm;
@@ -524,8 +552,9 @@ void loadConfiguration() {
     config.clockTimezone = doc.containsKey("timezone") ? doc["timezone"].as<uint8_t>() : CLOCK_TIMEZONE;
     config.mqttBroker = doc.containsKey("mqttBroker") ? doc["mqttBroker"].as<String>() : MQTT_BROKER;
     config.mqttPort = doc.containsKey("mqttPort") ? doc["mqttPort"].as<int>() : MQTT_PORT;
-    config.mqttTopicControl = doc.containsKey("mqttControlChannel") ? doc["mqttControlChannel"].as<String>() : MQTT_TOPIC_CONTROL;
-    config.mqttTopicStatus = doc.containsKey("mqttStatusChannel") ? doc["mqttStatusChannel"].as<String>() : MQTT_TOPIC_STATUS;
+    config.mqttTopicControl = doc.containsKey("mqttControlTopic") ? doc["mqttControlTopic"].as<String>() : MQTT_TOPIC_CONTROL;
+    config.mqttTopicStatus = doc.containsKey("mqttStatusTopic") ? doc["mqttStatusTopic"].as<String>() : MQTT_TOPIC_STATUS;
+    config.mqttTopicDiscovery = doc.containsKey("mqttDiscoveryTopic") ? doc["mqttDiscoveryTopic"].as<String>() : MQTT_TOPIC_DISCOVERY;
     config.mqttUsername = doc.containsKey("mqttUsername") ? doc["mqttUsername"].as<String>() : "";
     config.mqttPassword = doc.containsKey("mqttPassword") ? doc["mqttPassword"].as<String>() : "";
 
@@ -624,12 +653,15 @@ bool reconnectMqttClient() {
         }
 
         if (didConnect) {
-            Serial.print(F("INFO: Subscribing to channel: "));
+            Serial.print(F("INFO: Subscribing to topic: "));
             Serial.println(config.mqttTopicControl);
             mqttClient.subscribe(config.mqttTopicControl.c_str());
 
-            Serial.print(F("INFO: Publishing to channel: "));
+            Serial.print(F("INFO: Publishing to topic: "));
             Serial.println(config.mqttTopicStatus);
+
+            Serial.print(F("INFO: Discovery topic: "));
+            Serial.println(config.mqttTopicDiscovery);
         }
         else {
             String failReason = TelemetryHelper::getMqttStateDesc(mqttClient.state());
@@ -653,6 +685,7 @@ void onCheckMqtt() {
     if (reconnectMqttClient()) {
         Serial.println(F("INFO: Successfully reconnected to MQTT broker."));
         publishSystemState();
+        publishDiscoveryPacket();
     }
     else {
         Serial.println(F("ERROR: MQTT connection lost and reconnect failed."));

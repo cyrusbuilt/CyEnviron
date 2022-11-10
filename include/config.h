@@ -5,6 +5,7 @@
 
 #define DEBUG                                       // Comment to disable debug output.
 #define DEVICE_NAME "CYENVIRON"		                // The device name (hostname).
+#define DEVICE_CLASS "cyenviron"                    // The device class (used for discovery).
 #define BAUD_RATE 115200                            // The BAUD rate (speed) of the serial port (console).
 #define ENABLE_OTA                                  // Comment to disable OTA (over-the-air) firmware updates.
 #define ENABLE_MDNS                                 // Comment to disable MDNS (multicast-DNS) support.
@@ -16,8 +17,9 @@
 #define CLOCK_SYNC_INTERVAL 3600000                 // How often to sync the local clock with NTP (millis)
 #define CHECK_SENSORS_INTERVAL 5000                 // How often to chec the sensors.
 #define CHECK_MQTT_INTERVAL 60000 * 5               // MQTT connectivity check interval (millis).
-#define MQTT_TOPIC_STATUS "cyenviron/status"     	// MQTT status channel to publish to.
-#define MQTT_TOPIC_CONTROL "cyenviron/control"   	// MQTT control channel to subscribe to.
+#define MQTT_TOPIC_STATUS "cyenviron/status"     	// MQTT status topic to publish to.
+#define MQTT_TOPIC_CONTROL "cyenviron/control"   	// MQTT control topic to subscribe to.
+#define MQTT_TOPIC_DISCOVERY "redqueen/config"      // MQTT discovery topic to publish to.
 #define MQTT_BROKER "your_mqtt_broker_ip"           // MQTT broker hostname or IP.
 #define MQTT_PORT 8883                              // MQTT port number.
 #ifdef ENABLE_OTA
@@ -46,6 +48,7 @@ typedef struct {
     // MQTT stuff
     String mqttTopicStatus;
     String mqttTopicControl;
+    String mqttTopicDiscovery;
     String mqttBroker;
     String mqttUsername;
     String mqttPassword;
